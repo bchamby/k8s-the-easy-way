@@ -6,4 +6,4 @@ terraform.tfstate.backup
 terraform/terraform.tfvars
 ansible/inventory
 ansible/tls/
-
+ansible/kubeconfig/
