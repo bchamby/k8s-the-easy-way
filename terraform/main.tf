@@ -122,5 +122,5 @@ resource "google_compute_forwarding_rule" "apiserver" {
   "name"     = "apiserver"
   target     = "${google_compute_target_pool.apiserver.self_link}"
   port_range = "6443"
-  target     = "${google_compute_address.k8s-the-easy-way.address}"
+  ip_address = "${google_compute_address.k8s-the-easy-way.address}"
 }

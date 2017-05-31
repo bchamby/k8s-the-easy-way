@@ -1,5 +1,5 @@
 ---
-- name: ca config
+- name: create ca-config.json
   hosts: localhost
   connection: local
   tasks:
@@ -21,7 +21,7 @@
           }
           EOF
 
-- name: ca csr
+- name: create ca-csr.json
   hosts: localhost
   connection: local
   tasks:
@@ -46,7 +46,7 @@
           }
           EOF
 
-- name: admin client csr
+- name: create admin-csr.json
   hosts: localhost
   connection: local
   tasks:
@@ -72,7 +72,7 @@
           }
           EOF
 
-- name: kube-proxy csr
+- name: create kube-proxy-csr.json
   hosts: localhost
   connection: local
   tasks:
@@ -98,7 +98,7 @@
           }
           EOF
 
-- name: kubernetes csr
+- name: create kubernetes-csr.json
   hosts: localhost
   connection: local
   tasks:
@@ -136,25 +136,25 @@
           }
           EOF
 
-- name: ca
+- name: create ca certs
   hosts: localhost
   connection: local
   tasks:
     - shell: cfssl gencert -initca ./tls/ca-csr.json | cfssljson -bare ./tls/ca
 
-- name: admin
+- name: create admin certs
   hosts: localhost
   connection: local
   tasks:
     - shell: cfssl gencert -ca=./tls/ca.pem -ca-key=./tls/ca-key.pem -config=./tls/ca-config.json -profile=kubernetes ./tls/admin-csr.json | cfssljson -bare ./tls/admin
 
-- name: kube-proxy
+- name: create kube-proxy certs
   hosts: localhost
   connection: local
   tasks:
     - shell: cfssl gencert -ca=./tls/ca.pem -ca-key=./tls/ca-key.pem -config=./tls/ca-config.json -profile=kubernetes ./tls/kube-proxy-csr.json | cfssljson -bare ./tls/kube-proxy
 
-- name: kubernetes
+- name: create kubernetes certs
   hosts: localhost
   connection: local
   tasks:
