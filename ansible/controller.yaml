@@ -1,0 +1,18 @@
+---
+- name: copy controller.sh script to controllers
+  hosts: localhost
+  connection: local
+  tasks:
+    - shell: for i in controller0 controller1 controller2; do gcloud compute scp --zone=us-central1-a ./scripts/controller.sh ${i}:~/; done
+
+- name: make controller.sh executable
+  hosts: controllers
+  connection: ssh
+  tasks:
+    - shell: chmod a+x ~/controller.sh
+
+- name: install and configure controller
+  hosts: controllers
+  connection: ssh
+  tasks:
+    - shell: ~/controller.sh

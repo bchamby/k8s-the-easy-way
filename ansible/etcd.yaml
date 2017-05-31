@@ -1,0 +1,18 @@
+---
+- name: copy etcd.sh script to controllers
+  hosts: localhost
+  connection: local
+  tasks:
+    - shell: for i in controller0 controller1 controller2; do gcloud compute scp --zone=us-central1-a ./scripts/etcd.sh ${i}:~/; done
+
+- name: make etcd.sh executable
+  hosts: controllers
+  connection: ssh
+  tasks:
+    - shell: chmod a+x ~/etcd.sh
+
+- name: install and configure etcd
+  hosts: controllers
+  connection: ssh
+  tasks:
+    - shell: ~/etcd.sh

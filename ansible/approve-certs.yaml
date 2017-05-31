@@ -1,0 +1,6 @@
+---
+- name: approve cert requests on controller
+  hosts: controller0
+  connection: ssh
+  tasks:
+    - shell: for i in `kubectl get csr | awk 'NR > 1 {print $1}'`; do `kubectl certificate approve $i`; done

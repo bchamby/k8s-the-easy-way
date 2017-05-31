@@ -1,0 +1,24 @@
+---
+- name: enable TLS bootstrapping
+  hosts: controller0
+  connection: ssh
+  tasks:
+    - shell: kubectl create clusterrolebinding kubelet-bootstrap --clusterrole=system:node-bootstrapper --user=kubelet-bootstrap
+
+- name: copy worker.sh script to workers
+  hosts: localhost
+  connection: local
+  tasks:
+    - shell: for i in worker0 worker1 worker2; do gcloud compute scp --zone=us-central1-a ./scripts/worker.sh ${i}:~/; done
+
+- name: make worker.sh executable
+  hosts: workers
+  connection: ssh
+  tasks:
+    - shell: chmod a+x worker.sh
+
+- name: install and configure worker
+  hosts: workers
+  connection: ssh
+  tasks:
+    - shell: ~/worker.sh

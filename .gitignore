@@ -1,0 +1,6 @@
+_archive
+terraform/secrets
+terraform.tfstate
+terraform.tfstate.backup
+*.retry
+terraform/terraform.tfvars

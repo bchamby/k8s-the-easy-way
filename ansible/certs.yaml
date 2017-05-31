@@ -1,0 +1,173 @@
+---
+- name: ca config
+  hosts: localhost
+  connection: local
+  tasks:
+    - shell:
+        cmd: |
+          cat > ./tls/ca-config.json <<EOF
+          {
+            "signing": {
+              "default": {
+                "expiry": "8760h"
+              },
+              "profiles": {
+                "kubernetes": {
+                  "usages": ["signing", "key encipherment", "server auth", "client auth"],
+                  "expiry": "8760h"
+                }
+              }
+            }
+          }
+          EOF
+
+- name: ca csr
+  hosts: localhost
+  connection: local
+  tasks:
+    - shell:
+        cmd: |
+          cat > ./tls/ca-csr.json <<EOF
+          {
+            "CN": "Kubernetes",
+            "key": {
+              "algo": "rsa",
+              "size": 2048
+            },
+            "names": [
+              {
+                "C": "US",
+                "L": "Portland",
+                "O": "Kubernetes",
+                "OU": "CA",
+                "ST": "Oregon"
+              }
+            ]
+          }
+          EOF
+
+- name: admin client csr
+  hosts: localhost
+  connection: local
+  tasks:
+    - shell:
+        cmd: |
+          cat > ./tls/admin-csr.json <<EOF
+          {
+            "CN": "admin",
+            "hosts": [],
+            "key": {
+              "algo": "rsa",
+              "size": 2048
+            },
+            "names": [
+              {
+                "C": "US",
+                "L": "Portland",
+                "O": "system:masters",
+                "OU": "Cluster",
+                "ST": "Oregon"
+              }
+            ]
+          }
+          EOF
+
+- name: kube-proxy csr
+  hosts: localhost
+  connection: local
+  tasks:
+    - shell:
+        cmd: |
+          cat > ./tls/kube-proxy-csr.json <<EOF
+          {
+            "CN": "system:kube-proxy",
+            "hosts": [],
+            "key": {
+              "algo": "rsa",
+              "size": 2048
+            },
+            "names": [
+              {
+                "C": "US",
+                "L": "Portland",
+                "O": "system:node-proxier",
+                "OU": "Cluster",
+                "ST": "Oregon"
+              }
+            ]
+          }
+          EOF
+
+- name: kubernetes csr
+  hosts: localhost
+  connection: local
+  tasks:
+    - shell:
+        cmd: |
+          KUBERNETES_PUBLIC_ADDRESS=$(gcloud compute addresses describe k8s-the-easy-way --region us-central1 --format 'value(address)')
+          cat > ./tls/kubernetes-csr.json <<EOF
+          {
+            "CN": "kubernetes",
+            "hosts": [
+              "10.32.0.1",
+              "10.240.0.10",
+              "10.240.0.11",
+              "10.240.0.12",
+              "${KUBERNETES_PUBLIC_ADDRESS}",
+              "localhost",
+              "kubernetes.default",
+              "worker0",
+              "worker1",
+              "worker2"
+            ],
+            "key": {
+              "algo": "rsa",
+              "size": 2048
+            },
+            "names": [
+              {
+                "C": "US",
+                "L": "Portland",
+                "O": "Kubernetes",
+                "OU": "Cluster",
+                "ST": "Oregon"
+              }
+            ]
+          }
+          EOF
+
+- name: ca
+  hosts: localhost
+  connection: local
+  tasks:
+    - shell: cfssl gencert -initca ./tls/ca-csr.json | cfssljson -bare ./tls/ca
+
+- name: admin
+  hosts: localhost
+  connection: local
+  tasks:
+    - shell: cfssl gencert -ca=./tls/ca.pem -ca-key=./tls/ca-key.pem -config=./tls/ca-config.json -profile=kubernetes ./tls/admin-csr.json | cfssljson -bare ./tls/admin
+
+- name: kube-proxy
+  hosts: localhost
+  connection: local
+  tasks:
+    - shell: cfssl gencert -ca=./tls/ca.pem -ca-key=./tls/ca-key.pem -config=./tls/ca-config.json -profile=kubernetes ./tls/kube-proxy-csr.json | cfssljson -bare ./tls/kube-proxy
+
+- name: kubernetes
+  hosts: localhost
+  connection: local
+  tasks:
+    - shell: cfssl gencert -ca=./tls/ca.pem -ca-key=./tls/ca-key.pem -config=./tls/ca-config.json -profile=kubernetes ./tls/kubernetes-csr.json | cfssljson -bare ./tls/kubernetes
+
+- name: distribute node certs
+  hosts: localhost
+  connection: local
+  tasks:
+    - shell: for host in worker0 worker1 worker2; do gcloud compute scp --zone=us-central1-a ./tls/ca.pem ./tls/kube-proxy.pem ./tls/kube-proxy-key.pem ${host}:~/; done
+
+- name: distribute master certs
+  hosts: localhost
+  connection: local
+  tasks:
+    - shell: for host in controller0 controller1 controller2; do gcloud compute scp --zone=us-central1-a ./tls/ca.pem ./tls/ca-key.pem ./tls/kubernetes.pem ./tls/kubernetes-key.pem ${host}:~/; done
