@@ -5,4 +5,5 @@ terraform.tfstate.backup
 *.retry
 terraform/terraform.tfvars
 ansible/inventory
-ansible/tls
+ansible/tls/
+
