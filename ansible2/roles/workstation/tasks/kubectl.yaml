@@ -1,0 +1,9 @@
+---
+- name: configure kubectl on local system
+  shell:
+    cmd: |
+      KUBERNETES_PUBLIC_ADDRESS=$(gcloud compute addresses describe k8s-the-easy-way --region us-central1 --format 'value(address)')
+      kubectl config set-cluster k8s-the-easy-way --certificate-authority=roles/workstation/files/tls/ca.pem --embed-certs=true --server=https://${KUBERNETES_PUBLIC_ADDRESS}:6443
+      kubectl config set-credentials admin --client-certificate=roles/workstation/files/tls/admin.pem --client-key=roles/workstation/files/tls/admin-key.pem
+      kubectl config set-context k8s-the-easy-way --cluster=k8s-the-easy-way --user=admin
+      kubectl config use-context k8s-the-easy-way

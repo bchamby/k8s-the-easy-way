@@ -1,0 +1,48 @@
+---
+- name: create certs
+  hosts: localhost
+  connection: local
+  tasks:
+    - include: roles/workstation/tasks/certs.yaml
+
+- name: setup kubeconfig files
+  hosts: localhost
+  connection: local
+  tasks:
+    - include: roles/workstation/tasks/kubeconfig.yaml
+
+- name: install and configure etcd on controllers
+  hosts: controllers
+  connection: ssh
+  tasks:
+    - script: roles/controller/files/etcd.sh
+
+- name: install and configure control plane
+  hosts: controllers
+  connection: ssh
+  tasks:
+    - script: roles/controller/files/controller.sh
+
+- name: enable TLS bootstrapping
+  hosts: controller0
+  connection: ssh
+  tasks:
+    - include: roles/workstation/tasks/enable_bootstrap.yaml
+
+- name: install components on workers
+  hosts: workers
+  connection: ssh
+  tasks:
+    - script: roles/worker/files/worker.sh
+
+- name: approve cert requests
+  hosts: controller0
+  connection: ssh
+  tasks:
+    - include: roles/workstation/tasks/approve-certs.yaml
+
+- name: setup kubectl locally
+  hosts: localhost
+  connection: local
+  tasks:
+    - include: roles/workstation/tasks/kubectl.yaml

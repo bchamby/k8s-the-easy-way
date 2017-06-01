@@ -1,0 +1,140 @@
+---
+- name: create ca-config.json
+  shell:
+    cmd: |
+      cat > roles/workstation/files/tls/ca-config.json <<EOF
+      {
+        "signing": {
+          "default": {
+            "expiry": "8760h"
+          },
+          "profiles": {
+            "kubernetes": {
+              "usages": ["signing", "key encipherment", "server auth", "client auth"],
+              "expiry": "8760h"
+            }
+          }
+        }
+      }
+      EOF
+
+- name: create ca-csr.json
+  shell:
+    cmd: |
+      cat > roles/workstation/files/tls/ca-csr.json <<EOF
+      {
+        "CN": "Kubernetes",
+        "key": {
+          "algo": "rsa",
+          "size": 2048
+        },
+        "names": [
+          {
+            "C": "US",
+            "L": "Portland",
+            "O": "Kubernetes",
+            "OU": "CA",
+            "ST": "Oregon"
+          }
+        ]
+      }
+      EOF
+
+- name: create admin-csr.json
+  shell:
+    cmd: |
+      cat > roles/workstation/files/tls/admin-csr.json <<EOF
+      {
+        "CN": "admin",
+        "hosts": [],
+        "key": {
+          "algo": "rsa",
+          "size": 2048
+        },
+        "names": [
+          {
+            "C": "US",
+            "L": "Portland",
+            "O": "system:masters",
+            "OU": "Cluster",
+            "ST": "Oregon"
+          }
+        ]
+      }
+      EOF
+
+- name: create kube-proxy-csr.json
+  shell:
+    cmd: |
+      cat > roles/workstation/files/tls/kube-proxy-csr.json <<EOF
+      {
+        "CN": "system:kube-proxy",
+        "hosts": [],
+        "key": {
+          "algo": "rsa",
+          "size": 2048
+        },
+        "names": [
+          {
+            "C": "US",
+            "L": "Portland",
+            "O": "system:node-proxier",
+            "OU": "Cluster",
+            "ST": "Oregon"
+          }
+        ]
+      }
+      EOF
+
+- name: create kubernetes-csr.json
+  shell:
+    cmd: |
+      KUBERNETES_PUBLIC_ADDRESS=$(gcloud compute addresses describe k8s-the-easy-way --region us-central1 --format 'value(address)')
+      cat > roles/workstation/files/tls/kubernetes-csr.json <<EOF
+      {
+        "CN": "kubernetes",
+        "hosts": [
+          "10.32.0.1",
+          "10.240.0.10",
+          "10.240.0.11",
+          "10.240.0.12",
+          "${KUBERNETES_PUBLIC_ADDRESS}",
+          "localhost",
+          "kubernetes.default",
+          "worker0",
+          "worker1",
+          "worker2"
+        ],
+        "key": {
+          "algo": "rsa",
+          "size": 2048
+        },
+        "names": [
+          {
+            "C": "US",
+            "L": "Portland",
+            "O": "Kubernetes",
+            "OU": "Cluster",
+            "ST": "Oregon"
+          }
+        ]
+      }
+      EOF
+
+- name: create ca certs
+  shell: cfssl gencert -initca roles/workstation/files/tls/ca-csr.json | cfssljson -bare roles/workstation/files/tls/ca
+
+- name: create admin certs
+  shell: cfssl gencert -ca=roles/workstation/files/tls/ca.pem -ca-key=roles/workstation/files/tls/ca-key.pem -config=roles/workstation/files/tls/ca-config.json -profile=kubernetes roles/workstation/files/tls/admin-csr.json | cfssljson -bare roles/workstation/files/tls/admin
+
+- name: create kube-proxy certs
+  shell: cfssl gencert -ca=roles/workstation/files/tls/ca.pem -ca-key=roles/workstation/files/tls/ca-key.pem -config=roles/workstation/files/tls/ca-config.json -profile=kubernetes roles/workstation/files/tls/kube-proxy-csr.json | cfssljson -bare roles/workstation/files/tls/kube-proxy
+
+- name: create kubernetes certs
+  shell: cfssl gencert -ca=roles/workstation/files/tls/ca.pem -ca-key=roles/workstation/files/tls/ca-key.pem -config=roles/workstation/files/tls/ca-config.json -profile=kubernetes roles/workstation/files/tls/kubernetes-csr.json | cfssljson -bare roles/workstation/files/tls/kubernetes
+
+- name: distribute node certs
+  shell: for host in worker0 worker1 worker2; do gcloud compute scp --zone=us-central1-a roles/workstation/files/tls/ca.pem roles/workstation/files/tls/kube-proxy.pem roles/workstation/files/tls/kube-proxy-key.pem ${host}:~/; done
+
+- name: distribute master certs
+  shell: for host in controller0 controller1 controller2; do gcloud compute scp --zone=us-central1-a roles/workstation/files/tls/ca.pem roles/workstation/files/tls/ca-key.pem roles/workstation/files/tls/kubernetes.pem roles/workstation/files/tls/kubernetes-key.pem ${host}:~/; done

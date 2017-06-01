@@ -1,0 +1,13 @@
+---
+- name: create inventory file
+  shell:
+    cmd: |
+      if [ -f inventory ]; then
+        rm inventory
+      fi
+      echo '[controllers]' >> inventory
+      for i in controller0 controller1 controller2; do gcloud compute instances describe ${i} --zone=us-central1-a --format 'value(networkInterfaces[0].accessConfigs[0].natIP)' >> inventory; done
+      echo '[workers]' >> inventory
+      for i in worker0 worker1 worker2; do gcloud compute instances describe ${i} --zone=us-central1-a --format 'value(networkInterfaces[0].accessConfigs[0].natIP)' >> inventory; done
+      echo '[controller0]' >> inventory
+      for i in controller0; do gcloud compute instances describe ${i} --zone=us-central1-a --format 'value(networkInterfaces[0].accessConfigs[0].natIP)' >> inventory; done
