@@ -61,7 +61,7 @@ resource "google_compute_instance" "controller" {
   name           = "controller${count.index}"
   machine_type   = "n1-standard-1"
   zone           = "us-central1-a"
-  tags           = [, "k8s-the-easy-way", "controller"]
+  tags           = [, "k8s-the-easy-way", "controller", "controller${count.index}"]
   disk {
     image        = "ubuntu-1604-xenial-v20170307"
     size         = 200
@@ -83,7 +83,7 @@ resource "google_compute_instance" "worker" {
   name           = "worker${count.index}"
   machine_type   = "n1-standard-1"
   zone           = "us-central1-a"
-  tags           = [, "k8s-the-easy-way", "worker"]
+  tags           = [, "k8s-the-easy-way", "worker", "worker${count.index}"]
   disk {
     image        = "ubuntu-1604-xenial-v20170307"
     size         = 200
