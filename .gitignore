@@ -8,5 +8,4 @@ ansible/inventory
 ansible/tls/
 ansible/kubeconfig/
 terraform/.terraform.tfstate.lock.info
-ansible2/gce.py
-ansible2/gci.ini
+ansible2/inventory
