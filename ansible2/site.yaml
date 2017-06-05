@@ -1,9 +1,21 @@
 ---
-- name: create certs
+- name: Create controller and worker certs
   hosts: localhost
   connection: local
   tasks:
-    - include: roles/workstation/tasks/certs.yaml
+    - include: roles/workstation/tasks/create-certs.yaml
+
+- name: Distribute controller certs
+  hosts: tag_controller
+  connection: ssh
+  tasks:
+    - include: roles/controller/tasks/dist-controller-certs.yaml
+
+- name: Distribute worker certs
+  hosts: tag_worker
+  connection: ssh
+  tasks:
+    - include: roles/worker/tasks/dist-worker-certs.yaml
 
 - name: setup kubeconfig files
   hosts: localhost

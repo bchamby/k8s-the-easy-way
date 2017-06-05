@@ -5,7 +5,7 @@
     "10.240.0.10",
     "10.240.0.11",
     "10.240.0.12",
-    "104.197.210.18",
+    "{{ k8s_public_address.stdout }}",
     "localhost",
     "kubernetes.default",
     "worker0",

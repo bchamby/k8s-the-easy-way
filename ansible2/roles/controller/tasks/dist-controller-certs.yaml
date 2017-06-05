@@ -1,0 +1,14 @@
+---
+- name: Distribute controller certs
+  copy:
+    src: "{{ item }}"
+    dest: /var/tmp
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - roles/workstation/files/certs/ca.pem
+    - roles/workstation/files/certs/ca-key.pem
+    - roles/workstation/files/certs/kubernetes.pem
+    - roles/workstation/files/certs/kubernetes-key.pem
+  become: true
