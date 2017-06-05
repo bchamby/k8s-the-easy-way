@@ -1,6 +1,6 @@
 #!/bin/bash
 sudo mkdir -p /etc/etcd/
-sudo cp ca.pem kubernetes-key.pem kubernetes.pem /etc/etcd/
+sudo cp /var/tmp/ca.pem /var/tmp/kubernetes-key.pem /var/tmp/kubernetes.pem /etc/etcd/
 wget https://github.com/coreos/etcd/releases/download/v3.1.4/etcd-v3.1.4-linux-amd64.tar.gz
 tar -xvf etcd-v3.1.4-linux-amd64.tar.gz
 sudo mv etcd-v3.1.4-linux-amd64/etcd* /usr/bin/

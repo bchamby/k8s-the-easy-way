@@ -1,7 +1,7 @@
 #!/bin/bash
 sudo mkdir -p /var/lib/kubernetes/
 sudo mv token.csv /var/lib/kubernetes/
-sudo mv ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem /var/lib/kubernetes/
+sudo mv /var/tmp/ca.pem /var/tmp/ca-key.pem /var/tmp/kubernetes-key.pem /var/tmp/kubernetes.pem /var/lib/kubernetes/
 wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kube-apiserver
 wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kube-controller-manager
 wget https://storage.googleapis.com/kubernetes-release/release/v1.6.1/bin/linux/amd64/kube-scheduler
