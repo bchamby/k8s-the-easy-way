@@ -9,3 +9,6 @@ ansible/tls/
 ansible/kubeconfig/
 terraform/.terraform.tfstate.lock.info
 ansible2/inventory
+ansible2/roles/workstation/files/certs/
+ansible2/roles/workstation/files/kubeconfig/
+ansible2/roles/workstation/files/kubernetes-csr.json
