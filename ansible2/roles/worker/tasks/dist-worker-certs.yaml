@@ -1,5 +1,5 @@
 ---
-- name: Distribute worker certs
+- name: Distribute Worker certs
   copy:
     src: "{{ item }}"
     dest: /var/tmp

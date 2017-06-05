@@ -1,5 +1,5 @@
 ---
-- name: Distribute controller certs
+- name: Distribute Controller certs
   copy:
     src: "{{ item }}"
     dest: /var/tmp

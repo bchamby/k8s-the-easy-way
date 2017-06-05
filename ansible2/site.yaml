@@ -1,5 +1,5 @@
 ---
-- name: Create controller and worker certs
+- name: Create Controller and Worker certs
   hosts: localhost
   connection: local
   tasks:
