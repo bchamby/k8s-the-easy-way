@@ -17,7 +17,7 @@
   tasks:
     - include: roles/worker/tasks/dist-worker-certs.yaml
 
-- name: setup kubeconfig files
+- name: Create kubeconfig files
   hosts: localhost
   connection: local
   tasks:
