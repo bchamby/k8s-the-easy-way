@@ -23,6 +23,17 @@
   tasks:
     - include: roles/workstation/tasks/kubeconfig.yaml
 
+- name: Distribute token to controllers
+  hosts: tag_controller
+  tasks:
+    - include: roles/controller/tasks/dist-token.yaml
+
+- name: Distribute kubeconfig files
+  hosts: tag_worker
+  connection: ssh
+  tasks:
+    - include: roles/worker/tasks/dist-kubeconfig-files.yaml
+
 - name: install and configure etcd on controllers
   hosts: tag_controller
   connection: ssh

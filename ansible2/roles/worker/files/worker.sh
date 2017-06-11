@@ -1,8 +1,8 @@
 #!/bin/bash
 sudo mkdir -p /var/lib/{kubelet,kube-proxy,kubernetes}
 sudo mkdir -p /var/run/kubernetes
-sudo mv bootstrap.kubeconfig /var/lib/kubelet
-sudo mv kube-proxy.kubeconfig /var/lib/kube-proxy
+sudo mv /var/tmp/bootstrap.kubeconfig /var/lib/kubelet
+sudo mv /var/tmp/kube-proxy.kubeconfig /var/lib/kube-proxy
 sudo mv /var/tmp/ca.pem /var/lib/kubernetes/
 wget https://get.docker.com/builds/Linux/x86_64/docker-1.12.6.tgz
 tar -xvf docker-1.12.6.tgz

@@ -1,0 +1,11 @@
+---
+- name: Distribute token to controllers
+  copy:
+    src: "{{ item }}"
+    dest: /var/tmp
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - roles/workstation/files/kubeconfig/token.csv
+  become: true
