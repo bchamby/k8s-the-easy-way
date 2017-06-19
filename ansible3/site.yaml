@@ -42,6 +42,7 @@
       register: kubeconfig_result
     - include: roles/workstation/tasks/kubeconfig.yaml
       when: kubeconfig_result.stat.exists == False
+      # Comment
 
 - name: Distribute token to controllers
   hosts: tag_controller
