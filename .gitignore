@@ -3,7 +3,6 @@ terraform/secrets
 terraform.tfstate
 terraform.tfstate.backup
 *.retry
-terraform/terraform.tfvars
 ansible/inventory
 ansible/tls/
 ansible/kubeconfig/
