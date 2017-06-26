@@ -14,23 +14,23 @@
   hosts: tag_controller
   connection: ssh
   tasks:
-    - name: Check whether certs already exist
+    - name: Check whether controller already has certs
       stat:
-        path: roles/workstation/files/certs/ca.pem
-      register: cert_result
+        path: /var/lib/kubernetes/ca.pem
+      register: controller_has_certs
     - include: roles/controller/tasks/dist-controller-certs.yaml
-      when: cert_result.stat.exists == False
+      when: controller_has_certs.stat.exists == False
 
 - name: Distribute worker certs
   hosts: tag_worker
   connection: ssh
   tasks:
-    - name: Check whether certs already exist
+    - name: Check whether worker already has certs
       stat:
-        path: roles/workstation/files/certs/ca.pem
-      register: cert_result
+        path: /var/lib/kubernetes/ca.pem
+      register: worker_has_certs
     - include: roles/worker/tasks/dist-worker-certs.yaml
-      when: cert_result.stat.exists == False
+      when: worker_has_certs.stat.exists == False
 
 - name: Create kubeconfig files
   hosts: localhost
@@ -46,56 +46,71 @@
 - name: Distribute token to controllers
   hosts: tag_controller
   tasks:
-    - name: Check whether kubeconfig files already exist
+    - name: Check whether host already has token
       stat:
-        path: roles/workstation/files/kubeconfig/bootstrap.kubeconfig
-      register: kubeconfig_result
+        path: /var/lib/kubernetes/token.csv
+      register: controller_has_token
     - include: roles/controller/tasks/dist-token.yaml
-      when: kubeconfig_result.stat.exists == False
+      when: controller_has_token.stat.exists == False
 
 - name: Distribute kubeconfig files
   hosts: tag_worker
   connection: ssh
   tasks:
-    - name: Check whether kubeconfig files already exist
+    - name: Check whether worker already has kubeconfig file
       stat:
-        path: roles/workstation/files/kubeconfig/bootstrap.kubeconfig
-      register: kubeconfig_result
+        path: /var/lib/kubelet/bootstrap.kubeconfig
+      register: worker_has_kubeconfig
     - include: roles/worker/tasks/dist-kubeconfig-files.yaml
-      when: kubeconfig_result.stat.exists == False
+      when: worker_has_kubeconfig.stat.exists == False
 
-# - name: install and configure etcd on controllers
-#   hosts: tag_controller
-#   connection: ssh
-#   tasks:
-#     - script: roles/controller/files/etcd.sh
-#
-# - name: install and configure control plane
-#   hosts: tag_controller
-#   connection: ssh
-#   tasks:
-#     - script: roles/controller/files/controller.sh
-#
-# - name: enable TLS bootstrapping
-#   hosts: controller0
-#   connection: ssh
-#   tasks:
-#     - include: roles/workstation/tasks/enable_bootstrap.yaml
-#
-# - name: install components on workers
-#   hosts: tag_worker
-#   connection: ssh
-#   tasks:
-#     - script: roles/worker/files/worker.sh
-#
-# - name: approve cert requests
-#   hosts: controller0
-#   connection: ssh
-#   tasks:
-#     - include: roles/workstation/tasks/approve-certs.yaml
-#
-# - name: setup kubectl locally
-#   hosts: localhost
-#   connection: local
-#   tasks:
-#     - include: roles/workstation/tasks/kubectl.yaml
+- name: Install and configure etcd on controllers
+  hosts: tag_controller
+  connection: ssh
+  tasks:
+    - name: Check whether etcd is already installed
+      stat:
+        path: /etc/systemd/system/etcd.service
+      register: etcd_installed
+    - script: roles/controller/files/etcd.sh
+      when: etcd_installed.stat.exists == False
+
+- name: Install and configure control plane
+  hosts: tag_controller
+  connection: ssh
+  tasks:
+    - name: Check whether control plane is already installed
+      stat:
+        path: /etc/systemd/system/kube-apiserver.service
+      register: controlplane_installed
+    - script: roles/controller/files/controller.sh
+      when: controlplane_installed.stat.exists == False
+
+- name: Enable TLS bootstrapping
+  hosts: controller0
+  connection: ssh
+  tasks:
+    - include: roles/workstation/tasks/enable_bootstrap.yaml
+
+- name: Install components on workers
+  hosts: tag_worker
+  connection: ssh
+  tasks:
+    - name: Check whether worker already installed
+      stat:
+        path: /etc/systemd/system/kubelet.service
+      register: worker_installed
+    - script: roles/worker/files/worker.sh
+      when: worker_installed.stat.exists == False
+
+- name: Approve cert requests
+  hosts: controller0
+  connection: ssh
+  tasks:
+    - include: roles/workstation/tasks/approve-certs.yaml
+
+- name: Setup kubectl locally
+  hosts: localhost
+  connection: local
+  tasks:
+    - include: roles/workstation/tasks/kubectl.yaml
