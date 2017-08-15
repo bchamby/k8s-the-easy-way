@@ -62,9 +62,15 @@ resource "google_compute_instance" "controller" {
   machine_type   = "n1-standard-1"
   zone           = "us-central1-a"
   tags           = ["controller", "controller${count.index}"]
-  disk {
-    image        = "ubuntu-1604-xenial-v20170307"
-    size         = 200
+  # disk {
+  #   image        = "ubuntu-1604-xenial-v20170307"
+  #   size         = 200
+  # }
+  boot_disk {
+    initialize_params {
+      image      = "ubuntu-1604-xenial-v20170307"
+      size       = 200
+    }
   }
   can_ip_forward = true
   network_interface {
@@ -84,9 +90,15 @@ resource "google_compute_instance" "worker" {
   machine_type   = "n1-standard-1"
   zone           = "us-central1-a"
   tags           = ["worker", "worker${count.index}"]
-  disk {
-    image        = "ubuntu-1604-xenial-v20170307"
-    size         = 200
+  # disk {
+  #   image        = "ubuntu-1604-xenial-v20170307"
+  #   size         = 200
+  # }
+  boot_disk {
+    initialize_params {
+      image      = "ubuntu-1604-xenial-v20170307"
+      size       = 200
+    }
   }
   can_ip_forward = true
   network_interface {
