@@ -14,3 +14,4 @@ ansible2/files
 ansible3/roles/workstation/files/
 ansible2/roles/workstation/files/
 .DS_Store
+.terraform
