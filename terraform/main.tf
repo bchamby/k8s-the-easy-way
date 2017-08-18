@@ -52,6 +52,36 @@ resource "google_compute_firewall" "allow-healthz" {
   }
 }
 
+resource "google_compute_firewall" "allow-prometheus" {
+  name          = "allow-prometheus"
+  network       = "${google_compute_network.k8s-the-easy-way.name}"
+  source_ranges = ["0.0.0.0/0"]
+  allow {
+    protocol    = "tcp"
+    ports       = ["30900"]
+  }
+}
+
+resource "google_compute_firewall" "allow-alertmgrui" {
+  name          = "allow-alertmgrui"
+  network       = "${google_compute_network.k8s-the-easy-way.name}"
+  source_ranges = ["0.0.0.0/0"]
+  allow {
+    protocol    = "tcp"
+    ports       = ["30903"]
+  }
+}
+
+resource "google_compute_firewall" "allow-grafana" {
+  name          = "allow-grafana"
+  network       = "${google_compute_network.k8s-the-easy-way.name}"
+  source_ranges = ["0.0.0.0/0"]
+  allow {
+    protocol    = "tcp"
+    ports       = ["30902"]
+  }
+}
+
 resource "google_compute_address" "k8s-the-easy-way" {
   name = "k8s-the-easy-way"
 }
